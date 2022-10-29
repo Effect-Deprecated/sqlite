@@ -1,4 +1,4 @@
-import { identity, L, T } from '@myapp/utils/effect'
+import { identity, L, T } from '../utils/effect.js'
 import { Mutex } from 'async-mutex'
 
 import * as Connection from '../connection.js'

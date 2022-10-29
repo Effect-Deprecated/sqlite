@@ -1,6 +1,6 @@
-import type { Has, OT } from '@myapp/utils/effect'
-import { pipe, T } from '@myapp/utils/effect'
-import { provideOtelTracer } from '@myapp/utils/effect/Tracing/Dummy'
+import type { Has, OT } from '../utils/effect.js'
+import { pipe, T } from '../utils/effect.js'
+import { provideOtelTracer } from '../utils/dummy-tracer.js'
 import { expect, test } from 'vitest'
 
 import * as Client from '../client/index.js'

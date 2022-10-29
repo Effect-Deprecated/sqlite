@@ -1,6 +1,6 @@
-import { errorToString } from '@myapp/utils'
-import type { OT, T } from '@myapp/utils/effect'
-import { tag, Tagged } from '@myapp/utils/effect'
+import { errorToString } from './utils/index.js'
+import type { OT, T } from './utils/effect.js'
+import { tag, Tagged } from './utils/effect.js'
 import type { Mutex } from 'async-mutex'
 
 import { SqliteError } from './sqlite-error.js'

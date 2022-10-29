@@ -1,5 +1,5 @@
-import type { Has, O } from '@myapp/utils/effect'
-import { ImmArray, OT, pipe, T, tag } from '@myapp/utils/effect'
+import type { Has, O } from '../utils/effect.js'
+import { ImmArray, OT, pipe, T, tag } from '../utils/effect.js'
 
 import * as Connection from '../connection.js'
 import { objectEntries, sql } from '../misc.js'
@@ -148,7 +148,7 @@ export class Client<TDBName extends string, TSchema extends Schema.Schema> {
     return T.bracketExit_(
       pipe(
         T.accessServiceM(Connection.makeTag('app-db'))((connection) =>
-          T.tryPromiseOrDie(() => connection.txnMutex.acquire()),
+          T.tryPromise(() => connection.txnMutex.acquire()),
         ),
         T.tap(() => this.executeRaw(sql`BEGIN TRANSACTION`)),
       ),

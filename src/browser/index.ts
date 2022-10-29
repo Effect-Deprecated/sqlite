@@ -1,4 +1,4 @@
-import { identity, L, M, OT, pipe, T } from '@myapp/utils/effect'
+import { identity, L, M, OT, pipe, T } from '../utils/effect.js'
 import { Mutex } from 'async-mutex'
 import type * as SqliteWasm from 'sql.js'
 import initSqlJs from 'sql.js'

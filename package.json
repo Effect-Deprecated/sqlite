@@ -29,7 +29,24 @@
     "gen:sqlite-error-types": "node ./dist/scripts/generate-sqlite-error-types.js > ./src/sqlite-error.ts"
   },
   "dependencies": {
-    "@myapp/utils": "workspace:*",
+    "@effect-ts/core": "^0.60.2",
+    "@effect-ts/otel": "^0.14.1",
+    "@effect-ts/otel-exporter-trace-otlp-grpc": "^0.14.1",
+    "@effect-ts/otel-sdk-trace-node": "^0.14.1",
+    "@opentelemetry/api": "^1.1.0",
+    "@opentelemetry/api-metrics": "^0.31.0",
+    "@opentelemetry/core": "^1.5.0",
+    "@opentelemetry/exporter-metrics-otlp-http": "^0.31.0",
+    "@opentelemetry/exporter-trace-otlp-grpc": "0.31.0",
+    "@opentelemetry/exporter-trace-otlp-http": "0.31.0",
+    "@opentelemetry/resources": "1.5.0",
+    "@opentelemetry/sdk-metrics": "^0.32.0",
+    "@opentelemetry/sdk-node": "^0.31.0",
+    "@opentelemetry/sdk-trace-base": "1.5.0",
+    "@opentelemetry/sdk-trace-node": "1.5.0",
+    "@opentelemetry/sdk-trace-web": "1.5.0",
+    "@opentelemetry/semantic-conventions": "1.5.0",
+    "@opentelemetry/tracing": "^0.24.0",
     "async-mutex": "^0.4.0",
     "sql.js": "^1.7.0",
     "sqlite3": "^5.1.2"
@@ -38,6 +55,7 @@
     "@types/sql.js": "^1.4.4",
     "@types/sqlite3": "^3.1.8",
     "puppeteer": "^19.0.0",
+    "typescript": "^4.8.4",
     "vite": "^3.2.1",
     "vitest": "^0.24.3"
   }

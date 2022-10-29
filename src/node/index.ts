@@ -1,4 +1,4 @@
-import { identity, L, M, OT, pipe, T } from '@myapp/utils/effect'
+import { identity, L, M, OT, pipe, T } from '../utils/effect.js'
 import { Mutex } from 'async-mutex'
 // NOTE `sqlite3` is still a CJS module
 import Sqlite from 'sqlite3'

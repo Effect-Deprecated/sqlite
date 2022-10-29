@@ -1,4 +1,4 @@
-import { ImmArray, pipe } from '@myapp/utils/effect'
+import { ImmArray, pipe } from '../utils/effect.js'
 
 import type { BindValues } from '../connection.js'
 import { objectEntries, sql } from '../misc.js'
