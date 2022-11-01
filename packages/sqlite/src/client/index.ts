@@ -1,8 +1,8 @@
-import type { Has, O } from '../utils/effect.js'
-import { ImmArray, OT, pipe, T, tag } from '../utils/effect.js'
+import type {Has, O} from '../utils/effect.js'
+import {ImmArray, OT, pipe, T, tag} from '../utils/effect.js'
 
 import * as Connection from '../connection.js'
-import { objectEntries, sql } from '../misc.js'
+import {objectEntries, sql} from '../misc.js'
 import type * as Schema from '../schema.js'
 import * as SqlQueries from './sql-queries.js'
 import type * as ClientTypes from './types.js'
@@ -26,7 +26,12 @@ export class Client<TDBName extends string, TSchema extends Schema.Schema> {
   > =>
     pipe(
       this.executeRaw<ClientTypes.EncodedValuesForTable<TSchema, TTableName>>(
-        ...SqlQueries.findManyRows({ columns: this.schema.tables[tableName]!.columns, tableName, where, limit }),
+        ...SqlQueries.findManyRows({
+          columns: this.schema.tables[tableName]!.columns,
+          tableName,
+          where,
+          limit,
+        }),
       ),
       T.map(ImmArray.map((_) => decodeRow(this.schema, tableName, _))),
     )
@@ -55,8 +60,12 @@ export class Client<TDBName extends string, TSchema extends Schema.Schema> {
     where: ClientTypes.WhereValuesForTable<TSchema, TTableName>,
   ) =>
     pipe(
-      this.executeRaw<{ count: number }>(
-        ...SqlQueries.countRows({ columns: this.schema.tables[tableName]!.columns, tableName, where }),
+      this.executeRaw<{count: number}>(
+        ...SqlQueries.countRows({
+          columns: this.schema.tables[tableName]!.columns,
+          tableName,
+          where,
+        }),
       ),
       T.map(ImmArray.headUnsafe),
       T.map((_) => _.count),
@@ -65,14 +74,14 @@ export class Client<TDBName extends string, TSchema extends Schema.Schema> {
   create = <TTableName extends keyof TSchema['tables'] & string>(
     tableName: TTableName,
     values: ClientTypes.DecodedValuesForTablePretty<TSchema, TTableName>,
-    options?: { orReplace: boolean },
+    options?: {orReplace: boolean},
   ) =>
     this.executeRaw<void>(
       ...SqlQueries.insertRow({
         tableName,
         values,
         columns: this.schema.tables[tableName]!.columns,
-        options: options ?? { orReplace: false },
+        options: options ?? {orReplace: false},
       }),
     )
 
@@ -98,7 +107,11 @@ export class Client<TDBName extends string, TSchema extends Schema.Schema> {
     values: ClientTypes.DecodedValuesForTablePretty<TSchema, TTableName>,
   ) =>
     this.executeRaw<void>(
-      ...SqlQueries.insertOrIgnoreRow({ columns: this.schema.tables[tableName]!.columns, tableName, values }),
+      ...SqlQueries.insertOrIgnoreRow({
+        columns: this.schema.tables[tableName]!.columns,
+        tableName,
+        values,
+      }),
     )
 
   update = <TTableName extends keyof TSchema['tables'] & string>(
@@ -162,7 +175,9 @@ export class Client<TDBName extends string, TSchema extends Schema.Schema> {
   }
 
   executeRaw = <TRes>(sqlStr: string, bindValues: Connection.BindValues = {}) =>
-    T.accessServiceM(Connection.makeTag(this.dbName))((connection) => connection.execute<TRes>(sqlStr, bindValues))
+    T.accessServiceM(Connection.makeTag(this.dbName))((connection) =>
+      connection.execute<TRes>(sqlStr, bindValues),
+    )
 
   decodeRow = <TTableName extends keyof TSchema['tables'] & string>(
     tableName: TTableName,
@@ -176,18 +191,23 @@ export class Client<TDBName extends string, TSchema extends Schema.Schema> {
     return pipe(
       T.gen(function* ($) {
         const existingTables = yield* $(
-          self.executeRaw<{ name: string }>(sql`SELECT name FROM sqlite_master WHERE type='table'`),
+          self.executeRaw<{name: string}>(sql`SELECT name FROM sqlite_master WHERE type='table'`),
         )
 
         if (existingTables.length === Object.keys(self.schema.tables).length) return
 
         if (existingTables.length > 0) {
-          const dropAllTablesStr = existingTables.map(({ name: tableName }) => sql`DROP TABLE ${tableName}`).join('; ')
+          const dropAllTablesStr = existingTables
+            .map(({name: tableName}) => sql`DROP TABLE ${tableName}`)
+            .join('; ')
           yield* $(self.executeRaw(dropAllTablesStr))
         }
 
         const createAllTableStrs = Object.keys(self.schema.tables).map((tableName) =>
-          SqlQueries.createTable({ table: self.schema.tables[tableName]!, tableName }),
+          SqlQueries.createTable({
+            table: self.schema.tables[tableName]!,
+            tableName,
+          }),
         )
 
         yield* $(T.forEach_(createAllTableStrs, (str) => self.executeRaw(str)))
@@ -197,7 +217,10 @@ export class Client<TDBName extends string, TSchema extends Schema.Schema> {
   }
 }
 
-const decodeRow = <TSchema extends Schema.Schema, TTableName extends keyof TSchema['tables'] & string>(
+const decodeRow = <
+  TSchema extends Schema.Schema,
+  TTableName extends keyof TSchema['tables'] & string,
+>(
   schema: TSchema,
   tableName: TTableName,
   row: ClientTypes.EncodedValuesForTable<TSchema, TTableName>,

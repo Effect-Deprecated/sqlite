@@ -1,0 +1,51 @@
+{
+  "name": "@effect/sqlite-react",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "watch": "vite build --watch",
+    "build": "tsc && vite dist",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "sql.js": "^1.8.0",
+    "@opentelemetry/api": "^1.1.0",
+    "@opentelemetry/core": "^1.5.0",
+    "@opentelemetry/sdk-trace-base": "^1.5.0",
+    "@effect-ts/core": "^0.60.2",
+    "@effect-ts/otel": "^0.14.1",
+    "@effect/sqlite": "workspace:^",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/sql.js": "^1.4.4",
+    "@types/react": "^18.0.22",
+    "@types/react-dom": "^18.0.7",
+    "@vitejs/plugin-react": "^2.2.0",
+    "typescript": "^4.6.4",
+    "vite": "^3.2.0",
+    "vite-plugin-dts": "^1.6.6"
+  },
+  "peerDependencies": {
+    "@effect-ts/core": "^0.60.2",
+    "@effect-ts/otel": "^0.14.1",
+    "@effect/sqlite": "^0.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/sqlite-react.umd.js",
+  "module": "./dist/sqlite-react.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/sqlite-react.es.js",
+      "require": "./dist/sqlite-react.umd.js"
+    }
+  }
+}

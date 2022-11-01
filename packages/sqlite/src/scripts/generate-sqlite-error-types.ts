@@ -1,4 +1,4 @@
-import { identity } from '../src/utils/effect.js'
+import {identity} from '../utils/effect.js'
 import puppeteer from 'puppeteer'
 
 // USAGE: node ./dist/scripts/generate-sqlite-error-types.js > ./src/sqlite-error.ts

@@ -1,0 +1,67 @@
+{
+  "name": "@effect/sqlite",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./build/index.js"
+    },
+    "./node": {
+      "import": "./build/node/index.js"
+    },
+    "./browser": {
+      "import": "./build/browser/index.js"
+    }
+  },
+  "types": "./build/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "node": [
+        "./build/node"
+      ],
+      "browser": [
+        "./build/browser"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "rimraf build",
+    "tc": "tsc --noEmit",
+    "test": "vitest",
+    "gen:sqlite-error-types": "node ./build/scripts/generate-sqlite-error-types.js > ./src/sqlite-error.ts"
+  },
+  "dependencies": {
+    "@effect-ts/core": "^0.60.2",
+    "@effect-ts/otel": "^0.14.1",
+    "@effect-ts/otel-exporter-trace-otlp-grpc": "^0.14.1",
+    "@effect-ts/otel-sdk-trace-node": "^0.14.1",
+    "@effect-ts/system": "^0.57.4",
+    "@opentelemetry/api": "^1.1.0",
+    "@opentelemetry/api-metrics": "^0.31.0",
+    "@opentelemetry/core": "^1.5.0",
+    "@opentelemetry/exporter-metrics-otlp-http": "^0.31.0",
+    "@opentelemetry/exporter-trace-otlp-grpc": "0.31.0",
+    "@opentelemetry/exporter-trace-otlp-http": "0.31.0",
+    "@opentelemetry/resources": "1.5.0",
+    "@opentelemetry/sdk-metrics": "^0.32.0",
+    "@opentelemetry/sdk-node": "^0.31.0",
+    "@opentelemetry/sdk-trace-base": "1.5.0",
+    "@opentelemetry/sdk-trace-node": "1.5.0",
+    "@opentelemetry/sdk-trace-web": "1.5.0",
+    "@opentelemetry/semantic-conventions": "1.5.0",
+    "@opentelemetry/tracing": "^0.24.0",
+    "async-mutex": "^0.4.0",
+    "sql.js": "^1.8.0",
+    "sqlite3": "^5.1.2"
+  },
+  "devDependencies": {
+    "@types/sql.js": "^1.4.4",
+    "@types/sqlite3": "^3.1.8",
+    "puppeteer": "^19.0.0",
+    "typescript": "^4.8.4",
+    "vite": "^3.2.1",
+    "vitest": "^0.24.3"
+  }
+}

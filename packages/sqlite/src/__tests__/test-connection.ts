@@ -1,5 +1,5 @@
-import { identity, L, T } from '../utils/effect.js'
-import { Mutex } from 'async-mutex'
+import {identity, L, T} from '../utils/effect.js'
+import {Mutex} from 'async-mutex'
 
 import * as Connection from '../connection.js'
 
@@ -8,7 +8,10 @@ export const makeTestConnection = <TDBName extends string>(
   sqlQueries: [string, Connection.BindValues][],
 ) => L.fromEffect(Connection.makeTag(dbName))(T.succeed(getConnection(dbName, sqlQueries)))
 
-const getConnection = <TDBName extends string>(dbName: TDBName, sqlQueries: [string, Connection.BindValues][]) => {
+const getConnection = <TDBName extends string>(
+  dbName: TDBName,
+  sqlQueries: [string, Connection.BindValues][],
+) => {
   const execute = <TRet>(query: string, bindValues: Connection.BindValues) =>
     T.succeedWith(() => {
       sqlQueries.push([query, bindValues])
@@ -19,5 +22,5 @@ const getConnection = <TDBName extends string>(dbName: TDBName, sqlQueries: [str
 
   const txnMutex = new Mutex()
 
-  return identity<Connection.Connection<TDBName>>({ execute, dbName, exportDb, txnMutex })
+  return identity<Connection.Connection<TDBName>>({execute, dbName, exportDb, txnMutex})
 }

@@ -1,12 +1,15 @@
 {
   "compilerOptions": {
     "strict": true,
+    "resolveJsonModule": true,
     "noUncheckedIndexedAccess": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "esModuleInterop": true,
     "sourceMap": true,
     "declarationMap": true,
     "declaration": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Node",
     "strictNullChecks": true,
     "incremental": true,
     "composite": true,
@@ -16,9 +19,17 @@
     "noFallthroughCasesInSwitch": true,
     "noErrorTruncation": true,
     "isolatedModules": true,
+    "preserveSymlinks": true,
     "target": "ES2021",
     "module": "ESNext",
-    "plugins": [{ "transform": "@effect-ts/tracing-plugin" }],
+    "rootDir": ".",
+    "noUnusedLocals": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "@effect/sqlite": ["./packages/sqlite/src/index.ts"],
+      "@effect/sqlite-react": ["./packages/sqlite-react/src/index.ts"]
+    }
   },
-  "exclude": ["packages/**/dist", "node_modules", "packages/**/node_modules"]
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "dist", "build", "apps/**/node_modules"]
 }

@@ -1,5 +1,5 @@
-import { identity, L, M, OT, pipe, T } from '../utils/effect.js'
-import { Mutex } from 'async-mutex'
+import {identity, L, M, OT, pipe, T} from '../utils/effect.js'
+import {Mutex} from 'async-mutex'
 import type * as SqliteWasm from 'sql.js'
 import initSqlJs from 'sql.js'
 
@@ -18,8 +18,10 @@ export const makeSqliteConnection = <TDBName extends string>(dbName: TDBName, op
     ),
   )
 
-export const makeSqliteConnectionFromDb = <TDBName extends string>(dbName: TDBName, db: SqliteWasm.Database) =>
-  L.fromEffect(Connection.makeTag(dbName))(T.succeed(getConnection(dbName, db)))
+export const makeSqliteConnectionFromDb = <TDBName extends string>(
+  dbName: TDBName,
+  db: SqliteWasm.Database,
+) => L.fromEffect(Connection.makeTag(dbName))(T.succeed(getConnection(dbName, db)))
 
 const openDb = (options: DbOptions) =>
   pipe(
@@ -32,7 +34,7 @@ const openDb = (options: DbOptions) =>
     ),
     T.map((_) => new _.Database(options.initialData)),
     T.orDie,
-    OT.withSpan('sql-client:openDb', { attributes: {} }),
+    OT.withSpan('sql-client:openDb', {attributes: {}}),
   )
 
 const closeDb = (db: SqliteWasm.Database) =>
@@ -62,21 +64,29 @@ export const getConnection = <TDBName extends string>(dbName: TDBName, db: Sqlit
 
           return result
         },
-        (error) => Connection.makeError({ error, query, bindValues }),
+        (error) => Connection.makeError({error, query, bindValues}),
       ),
       T.retryWhile((e) => e.error.code === 'SQLITE_BUSY'),
       T.tap((rows) => OT.addAttribute('rowsCount', rows.length)),
       OT.withSpan('sql-client:execute', {
-        attributes: { 'sql.query': query, 'sql.bindValues': Connection.bindValuesToLogString(bindValues) },
+        attributes: {
+          'sql.query': query,
+          'sql.bindValues': Connection.bindValuesToLogString(bindValues),
+        },
       }),
     )
 
   const exportDb = T.tryCatch(
     () => db.export(),
-    (error) => Connection.makeError({ error }),
+    (error) => Connection.makeError({error}),
   )
 
   const txnMutex = new Mutex()
 
-  return identity<Connection.Connection<TDBName>>({ dbName, execute, exportDb, txnMutex })
+  return identity<Connection.Connection<TDBName>>({
+    dbName,
+    execute,
+    exportDb,
+    txnMutex,
+  })
 }
