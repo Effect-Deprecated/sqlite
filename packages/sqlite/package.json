@@ -30,6 +30,7 @@
     "clean": "rimraf build",
     "tc": "tsc --noEmit",
     "test": "vitest",
+    "test:watch": "vitest --watch",
     "gen:sqlite-error-types": "node ./build/scripts/generate-sqlite-error-types.js > ./src/sqlite-error.ts"
   },
   "dependencies": {

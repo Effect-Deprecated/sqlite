@@ -21,6 +21,20 @@
       "command": "pnpm watch",
       "isBackground": false,
       "problemMatcher": []
+    },
+    {
+      "label": "test",
+      "type": "shell",
+      "command": "pnpm test",
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "test:watch",
+      "type": "shell",
+      "command": "pnpm test:watch",
+      "isBackground": false,
+      "problemMatcher": []
     }
   ]
 }

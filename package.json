@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "pnpm --filter @effect/sqlite build",
+    "test": "ultra -r test",
+    "test:watch": "ultra -r test:watch",
     "watch": "ultra -r watch",
     "clean": "ultra -r clean",
     "editor": "pnpm --filter @effect/sqlite-editor dev",
