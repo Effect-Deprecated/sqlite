@@ -10,7 +10,7 @@ export function useDb(name: string, url: URL) {
   const db = React.useRef<Database | null>(null)
 
   React.useEffect(() => {
-    run(name, url, client)
+    run(name, url)
       .then((database) => {
         db.current = database
         setStatus('ready')
@@ -21,7 +21,7 @@ export function useDb(name: string, url: URL) {
   return {name, status, db: db.current, client}
 }
 
-async function run(name: string, url: URL, client: Client.Client<string, Schema.Schema>) {
+async function run(name: string, url: URL) {
   const sql = await initSqlJs({
     locateFile: () => `/sql-wasm.wasm`,
   })

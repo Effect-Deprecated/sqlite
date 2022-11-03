@@ -2,7 +2,7 @@ import {useQuery, useDb} from '@effect/sqlite-react'
 
 const databaseName = `main`
 
-export default function App() {
+export function App() {
   const fromDb = useDb(databaseName, new URL(`/1.sqlite`, document.location.origin))
   const {rows} = useQuery({
     ...fromDb,
