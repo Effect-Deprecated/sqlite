@@ -127,7 +127,7 @@ export const updateRows = <TColumns extends Schema.Columns>({
   where: ClientTypes.WhereValuesForColumns<TColumns>
 }): [string, BindValues] => {
   const updateValueStr = Object.keys(updateValues)
-    .map((columnName) => `${columnName} = $update_${columnName}`)
+    .map((columnName) => `"${columnName}" = $update_${columnName}`)
     .join(', ')
 
   const bindValues = {

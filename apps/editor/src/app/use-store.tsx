@@ -1,6 +1,5 @@
 import * as React from 'react'
 import create from 'zustand'
-import shallow from 'zustand/shallow'
 
 import {store} from './store'
 import {Message} from './types'
@@ -12,6 +11,7 @@ export const useConnections = () =>
     connections: state.connections,
     selectedConnection: state.selectedConnection,
     run: {
+      download: state.download,
       connect: state.connect,
       reconnect: state.reconnect,
     },
@@ -23,15 +23,19 @@ export const useTables = () =>
     selectedTable: state.selectedTable,
     rows: state.rows,
     cols: state.cols,
+    jsonView: state.jsonView,
+    tableView: state.tableView,
     run: {
+      jsonViewSwitch: state.jsonViewSwitch,
+      tableViewSwitch: state.tableViewSwitch,
       tableOpen: state.tableOpen,
+      tableClose: state.tableClose,
       tableRefresh: state.tableRefresh,
+      tableUpdateRow: state.tableUpdateRow,
     },
   }))
 
 type MessageFn = (message: Message) => void
-
-let i = 0
 
 export const subscribeMessage = (cb: MessageFn) =>
   useStore.subscribe(

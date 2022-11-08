@@ -11,8 +11,12 @@ const reduceOptions = (list: (Connection | Table)[]) =>
 
 const makeOnChange =
   (fn: (value: string) => void) =>
-  (value: string, _path: string, options: {fromPanel: boolean}) => {
-    if (options.fromPanel && value !== `none`) {
+  (
+    value: string,
+    _path: string,
+    options: {initial: boolean; fromPanel: boolean},
+  ) => {
+    if (!options.initial && options.fromPanel && value !== `none`) {
       fn(value)
     }
   }
@@ -33,7 +37,14 @@ function useConnectionsControls() {
         onChange: makeOnChange(fromConn.run.connect),
       },
       ' ': buttonGroup({
+        download: fromConn.run.download,
+        '|': () => {},
         reconnect: fromConn.run.reconnect,
+      }),
+      '  ': buttonGroup({
+        '+ url': () => {},
+        '+ upload': () => {},
+        '+ empty': () => {},
       }),
     }),
     [options],
@@ -46,7 +57,11 @@ function useConnectionsControls() {
 
 function useTablesControls() {
   const fromTables = useTables()
-  const options = reduceOptions(fromTables.tables)
+  const {jsonView, tableView} = fromTables
+  const options = React.useMemo(
+    () => reduceOptions(fromTables.tables),
+    [fromTables.tables],
+  )
   const current = fromTables.selectedTable || options.none
 
   const [, set] = useControls(
@@ -54,18 +69,44 @@ function useTablesControls() {
     () => ({
       current: {
         options,
-        onChange: makeOnChange(fromTables.run.tableOpen),
+        onChange: (tableName, _path, {initial, fromPanel}) => {
+          if (!initial && fromPanel) {
+            if (tableName === `none`) {
+              fromTables.run.tableClose()
+            } else {
+              fromTables.run.tableOpen(tableName)
+            }
+          }
+        },
       },
       ' ': buttonGroup({
         refresh: () => fromTables.run.tableRefresh(),
       }),
+      jsonView: {
+        value: jsonView,
+        onChange: (_, __, {initial, fromPanel}) => {
+          if (!initial && fromPanel) {
+            fromTables.run.jsonViewSwitch()
+          }
+        },
+        transient: true,
+      },
+      tableView: {
+        value: tableView,
+        onChange: (_, __, {initial, fromPanel}) => {
+          if (!initial && fromPanel) {
+            fromTables.run.tableViewSwitch()
+          }
+        },
+        transient: false,
+      },
     }),
     [options],
   )
 
-  React.useEffect(() => {
-    set({current})
-  }, [current])
+  React.useEffect(() => set({current}), [current])
+  React.useEffect(() => set({jsonView}), [jsonView])
+  React.useEffect(() => set({tableView}), [tableView])
 }
 
 export function PanelProvider(props: {

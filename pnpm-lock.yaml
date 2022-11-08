@@ -55,6 +55,7 @@ importers:
       '@iconify/react': ^4.0.0
       '@tailwindcss/typography': ^0.5.7
       '@tanstack/react-location': ^3.7.4
+      '@types/file-saver': ^2.0.5
       '@types/react': ^18.0.22
       '@types/react-dom': ^18.0.7
       '@types/sql.js': ^1.4.4
@@ -62,6 +63,7 @@ importers:
       autoprefixer: ^10.4.13
       classnames: ^2.3.2
       daisyui: ^2.38.0
+      file-saver: ^2.0.5
       generouted: ^1.5.1
       leva: ^0.9.34
       marked: ^4.2.1
@@ -95,6 +97,7 @@ importers:
       '@tanstack/react-location': 3.7.4_biqbaboplfbrettd7655fr4n2y
       classnames: 2.3.2
       daisyui: 2.38.0_lycaqaeny3mp632atgvyvqdgwe
+      file-saver: 2.0.5
       generouted: 1.5.1_hxd5bmkgmvn6o4j6ngonxtveqq
       leva: 0.9.34_biqbaboplfbrettd7655fr4n2y
       marked: 4.2.1
@@ -106,6 +109,7 @@ importers:
       tailwindcss-radix: 2.6.1
       zustand: 4.1.4_react@18.2.0
     devDependencies:
+      '@types/file-saver': 2.0.5
       '@types/react': 18.0.24
       '@types/react-dom': 18.0.8
       '@types/sql.js': 1.4.4
@@ -1591,6 +1595,10 @@ packages:
 
   /@types/emscripten/1.39.6:
     resolution: {integrity: sha512-H90aoynNhhkQP6DRweEjJp5vfUVdIj7tdPLsu7pq89vODD/lcugKfZOsfgwpvM6XUewEp2N5dCg1Uf3Qe55Dcg==}
+    dev: true
+
+  /@types/file-saver/2.0.5:
+    resolution: {integrity: sha512-zv9kNf3keYegP5oThGLaPk8E081DFDuwfqjtiTzm6PoxChdJ1raSuADf2YGCVIyrSynLrgc8JWv296s7Q7pQSQ==}
     dev: true
 
   /@types/istanbul-lib-coverage/2.0.4:
@@ -3145,6 +3153,10 @@ packages:
     dependencies:
       flat-cache: 3.0.4
     dev: true
+
+  /file-saver/2.0.5:
+    resolution: {integrity: sha512-P9bmyZ3h/PRG+Nzga+rbdI4OEpNDzAVyy74uVO9ATgzLK6VtAsYybF/+TOCvrc0MO793d6+42lLyZTw7/ArVzA==}
+    dev: false
 
   /file-selector/0.5.0:
     resolution: {integrity: sha512-s8KNnmIDTBoD0p9uJ9uD0XY38SCeBOtj0UMXyQSLg1Ypfrfj8+dAvwsLjYQkQ2GjhVtp2HrnF5cJzMhBjfD8HA==}

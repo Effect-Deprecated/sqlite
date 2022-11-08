@@ -1,4 +1,5 @@
 import '@glideapps/glide-data-grid/dist/index.css'
+import cx from 'classnames'
 
 import * as React from 'react'
 
@@ -11,42 +12,23 @@ import {
 } from '@glideapps/glide-data-grid'
 
 import {SectionCenter} from 'ui/section'
-import {Title} from 'ui/title'
-import {useConnections, useTables} from 'app/use-store'
+import {useTables} from 'app/use-store'
 
 export function ScreenHome() {
   return (
     <>
-      <SectionConnections />
       <SectionTable />
     </>
   )
 }
 
-function SectionConnections(props: {className?: string}) {
-  return (
-    <SectionCenter className={props.className}>
-      <Title>Connections</Title>
-      <BlockConnectionsActions />
-      {/* <BlockConnections /> */}
-    </SectionCenter>
-  )
-}
-
-function BlockConnectionsActions() {
-  return (
-    <div className="flex">
-      <button className="btn btn-xs btn-ghost">+ From URL</button>
-      <button className="btn btn-xs btn-ghost">+ Upload</button>
-      <button className="btn btn-xs btn-ghost">+ Empty</button>
-    </div>
-  )
-}
-
 function SectionTable() {
+  const {jsonView, tableView} = useTables()
+
   return (
-    <SectionCenter>
-      <DataTable />
+    <SectionCenter className="gap-4">
+      {tableView ? <BlockTableView /> : null}
+      {jsonView ? <BlockJsonView /> : null}
     </SectionCenter>
   )
 }
@@ -59,15 +41,18 @@ const getValue = (
     ? dataRow[index]
     : ``
 
-function DataTable() {
-  const {rows, cols} = useTables()
+function BlockTableView() {
+  const {rows, cols, run} = useTables()
 
-  const indexes = cols.map((item) => item.name)
+  const {indexes, columns} = React.useMemo(() => {
+    const indexes = cols.map((item) => item.name)
+    const columns = indexes.map((name) => ({
+      title: name,
+      id: name,
+    }))
 
-  const columns = indexes.map((name) => ({
-    title: name,
-    id: name,
-  }))
+    return {indexes, columns}
+  }, [cols])
 
   const getContent = React.useCallback(
     (cell: Item): GridCell => {
@@ -87,23 +72,20 @@ function DataTable() {
   const onCellEdited = React.useCallback(
     (cell: Item, newValue: EditableGridCell) => {
       if (newValue.kind !== GridCellKind.Text) {
-        // we only have text cells, might as well just die here.
         return
       }
 
       const [col, row] = cell
       const key = indexes[col]
 
-      console.log(col, row, key, newValue.data)
-      // const key = indexes[col];
-      // data[row][key] = newValue.data;
+      if (key) {
+        run.tableUpdateRow(row, {[key]: newValue.data})
+      }
     },
-    [],
+    [indexes],
   )
 
   const notReady = cols.length === 0
-
-  // console.log(`data-table`, rows, cols)
 
   if (notReady) {
     return null
@@ -120,6 +102,41 @@ function DataTable() {
     </div>
   )
 }
+
+function BlockJsonView(props: {className?: string}) {
+  const {rows} = useTables()
+
+  return (
+    <div className={cx(`mockup-code max-w-md text-xs`, props.className)}>
+      {JSON.stringify(rows, null, 2)
+        .split(`\n`)
+        .map((line, key) => (
+          <pre key={key} data-prefix={key}>
+            <code>{line}</code>
+          </pre>
+        ))}
+    </div>
+  )
+}
+
+// function SectionConnections(props: {className?: string}) {
+//   return (
+//     <SectionCenter className={props.className}>
+//       <Title>Connections</Title>
+//       <BlockConnectionsActions />
+//     </SectionCenter>
+//   )
+// }
+
+// function BlockConnectionsActions() {
+//   return (
+//     <div className="flex">
+//       <button className="btn btn-xs btn-ghost">+ From URL</button>
+//       <button className="btn btn-xs btn-ghost">+ Upload</button>
+//       <button className="btn btn-xs btn-ghost">+ Empty</button>
+//     </div>
+//   )
+// }
 
 // function BlockConnections() {
 //   const {connections, connectionSelected, run} = React.useContext(Context)

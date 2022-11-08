@@ -19,7 +19,7 @@ export default function App({children}: {children: React.ReactNode}) {
 
       <ToastContainer
         theme="dark"
-        position="bottom-right"
+        position="bottom-left"
         autoClose={1000}
         transition={Flip}
       />

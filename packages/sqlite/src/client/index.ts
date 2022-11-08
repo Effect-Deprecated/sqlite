@@ -123,8 +123,8 @@ export class Client<TDBName extends string, TSchema extends Schema.Schema> {
       values: Partial<ClientTypes.DecodedValuesForTableAll<TSchema, TTableName>>
       where: ClientTypes.WhereValuesForTable<TSchema, TTableName>
     },
-  ) =>
-    this.executeRaw<void>(
+  ) => {
+    return this.executeRaw<void>(
       ...SqlQueries.updateRows({
         columns: this.schema.tables[tableName]!.columns,
         tableName,
@@ -132,6 +132,7 @@ export class Client<TDBName extends string, TSchema extends Schema.Schema> {
         where,
       }),
     )
+  }
 
   upsert = <TTableName extends keyof TSchema['tables'] & string>(
     tableName: TTableName,

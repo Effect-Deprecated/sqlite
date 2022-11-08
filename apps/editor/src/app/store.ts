@@ -1,4 +1,6 @@
+import {saveAs} from 'file-saver'
 import createStore from 'zustand/vanilla'
+import {subscribeWithSelector} from 'zustand/middleware'
 
 import {
   connect,
@@ -7,9 +9,9 @@ import {
   SqliteConnection,
   SqliteSchema,
   SqliteClient,
+  update,
 } from './api'
 import type {Connection, Column, Table, Row, Message} from './types'
-import {subscribeWithSelector} from 'zustand/middleware'
 
 type Store = {
   db: SqliteDatabase | null
@@ -25,14 +27,26 @@ type Store = {
   rows: Row[]
   cols: Column[]
 
+  jsonView: boolean
+
+  tableView: boolean
+
   message: Message | null
+
+  jsonViewSwitch: () => void
+  tableViewSwitch: () => void
 
   connect: (name: string) => void
   reconnect: () => void
+  download: () => void
 
   tableOpen: (tableName: string) => void
+  tableClose: () => void
   tableRefresh: () => void
+  tableUpdateRow: (rowIndex: number, values: Record<string, any>) => void
 }
+
+const getBaseUrl = () => document.location.origin
 
 export const store = createStore(
   subscribeWithSelector<Store>((set, get) => ({
@@ -49,15 +63,27 @@ export const store = createStore(
     rows: [],
     cols: [],
 
+    jsonView: false,
+    tableView: true,
+
     message: null,
 
-    connect: async (name) => {
+    jsonViewSwitch: () => set((state) => ({jsonView: !state.jsonView})),
+    tableViewSwitch: () => set((state) => ({tableView: !state.tableView})),
+
+    async connect(name) {
       const fnName = `connect`
-      const {connections, tableOpen, selectedTable} = get()
+      const {
+        connections,
+        tableOpen,
+        tableClose,
+        selectedTable,
+        selectedConnection,
+      } = get()
       const currentConnection = connections.find((v) => v.name === name)
 
       if (currentConnection && currentConnection.url) {
-        const url = new URL(currentConnection.url, document.location.origin)
+        const url = new URL(currentConnection.url, getBaseUrl())
         const {db, client, schema, connectionLayer, tables} = await connect(
           currentConnection.name,
           url,
@@ -73,7 +99,11 @@ export const store = createStore(
         })
 
         if (selectedTable) {
-          tableOpen(selectedTable)
+          if (selectedConnection !== name) {
+            tableClose()
+          } else {
+            tableOpen(selectedTable)
+          }
         }
       } else {
         set(() => ({
@@ -82,14 +112,22 @@ export const store = createStore(
       }
     },
 
-    reconnect: () => {
+    reconnect() {
       const {connect, selectedConnection} = get()
       if (selectedConnection) {
         connect(selectedConnection)
       }
     },
 
-    tableOpen: async (tableName: string) => {
+    download() {
+      const {db} = get()
+      if (db) {
+        const blob = new Blob([db.export()], {type: `application/vnd.sqlite3`})
+        saveAs(blob, `db.sqlite`)
+      }
+    },
+
+    async tableOpen(tableName: string) {
       const fnName = `chooseTable`
 
       try {
@@ -120,11 +158,42 @@ export const store = createStore(
       }
     },
 
+    async tableUpdateRow(rowIndex, values) {
+      const {rows, cols, client, connectionLayer, selectedTable} = get()
+      const pks = getPrimaryKeys(cols)
+      const row = rows[rowIndex]
+      if (client && connectionLayer && selectedTable && row) {
+        const where = pks.reduce<Record<string, any>>(
+          (r, key) => ((r[key] = row[key]), r),
+          {},
+        )
+
+        await update(client, connectionLayer, selectedTable, {
+          where,
+          values,
+        })
+
+        set({
+          rows: rows.map((v, index) =>
+            rowIndex === index ? Object.assign(v, values) : v,
+          ),
+        })
+      }
+    },
+
     tableRefresh() {
       const {connect, selectedConnection} = get()
       if (selectedConnection) {
         connect(selectedConnection)
       }
+    },
+
+    tableClose() {
+      set({
+        selectedTable: null,
+        cols: [],
+        rows: [],
+      })
     },
   })),
 )
@@ -157,7 +226,15 @@ function mockConnections(): Connection[] {
     {
       name: `secondary`,
       type: `remote`,
-      url: `/1.sqlite`,
+      url: `/2.sqlite`,
+    },
+    {
+      name: `downloaded`,
+      type: `remote`,
+      url: `/db.sqlite`,
     },
   ]
 }
+
+const getPrimaryKeys = (cols: Column[]) =>
+  cols.filter((v) => v.pk).map((v) => v.name)

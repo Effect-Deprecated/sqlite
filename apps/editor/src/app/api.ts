@@ -7,13 +7,19 @@ import {provideOtelTracer} from 'utils/dummy-tracer.js'
 import type {OT} from 'utils/effect.js'
 import {pipe, T} from 'utils/effect.js'
 
+import {Column, Table} from './types'
+
 export type SqliteConnection = ReturnType<typeof makeSqliteConnectionFromDb>
 export type SqliteClient = Client.Client<string, Schema.Schema>
 export type SqliteDatabase = Database
 export type SqliteSchema = Schema.Schema
 
-export async function connect(name: string, url: URL) {
-  const schema = Schema.defineSchema({tables: {}})
+export async function connect(
+  name: string,
+  url: URL,
+  schemaSource: Schema.Schema = {tables: {}},
+) {
+  const schema = Schema.defineSchema(schemaSource)
   const client = new Client.Client(name, schema)
 
   const sql = await initSqlJs({
@@ -32,62 +38,96 @@ export async function connect(name: string, url: URL) {
 
   const tables = await executeRaw(client, connectionLayer, plainQueryTables)
 
+  const schemaExtractedSource = await extractSchema(
+    client,
+    connectionLayer,
+    tables as Table[],
+  )
+
+  const schemaExtracted = Schema.defineSchema(schemaExtractedSource)
+
   return {
     db,
-    client,
-    schema,
+    client: new Client.Client(name, schemaExtracted),
+    schema: schemaExtracted,
     connectionLayer,
     tables,
   }
 }
+
+async function extractSchema(
+  client: Client.Client<string, Schema.Schema>,
+  connectionLayer: ReturnType<typeof makeSqliteConnectionFromDb>,
+  tables: Table[],
+) {
+  const tablesNames = tables.map((v) => v.name)
+  const tablesList = await Promise.all(
+    tablesNames.map(extractTableSchema(client, connectionLayer)),
+  )
+
+  return {tables: tablesList.reduce((r, v) => Object.assign(r, v), {})}
+}
+
+const getType = (rawType: string) => {
+  const type = rawType.split(`(`)[0]
+  switch (type) {
+    case 'INTEGER':
+      return Schema.integer()
+    case 'JSON':
+      return Schema.json()
+    case 'BLOB':
+      return Schema.blob()
+    case 'real':
+      return Schema.real()
+    default:
+      return Schema.text()
+  }
+}
+
+const extractTableSchema =
+  (
+    client: Client.Client<string, Schema.Schema>,
+    connectionLayer: ReturnType<typeof makeSqliteConnectionFromDb>,
+  ) =>
+  async (tableName: string) => {
+    const cols = (await executeRaw(
+      client,
+      connectionLayer,
+      makeQueryTableCols(tableName),
+    )) as Column[]
+
+    const columns = cols.reduce<Schema.Columns>((r, v) => {
+      r[v.name] = Schema.column({
+        type: getType(v.type) as any,
+        primaryKey: Boolean(v.pk),
+        nullable: !Boolean(v.notnull),
+      })
+      return r
+    }, {})
+
+    return {
+      [tableName]: {columns},
+    }
+  }
 
 const plainQueryTables = `SELECT * FROM sqlite_schema WHERE type ='table' AND name NOT LIKE 'sqlite_%'`
 const makeQueryTableCols = (tableName: string) =>
   `PRAGMA table_info(${tableName})`
 const makeQueryTableAll = (tableName: string) => `SELECT * FROM ${tableName}`
 
-// async function run(name: string, url: URL) {
-//   const schema = Schema.defineSchema({tables: {}})
-//   const client = new Client.Client(name, schema)
-
-//   const sql = await initSqlJs({
-//     locateFile: () => `/sql-wasm.wasm`,
-//   })
-
-//   const r = await fetch(url)
-
-//   if (!r.ok) {
-//     throw new Error(r.statusText)
-//   }
-
-//   const buffer = await r.arrayBuffer()
-//   const db = new sql.Database(new Uint8Array(buffer))
-//   const connectionLayer = makeSqliteConnectionFromDb(name, db)
-
-//   const tables = await executeRaw(client, connectionLayer, plainQueryTables)
-
-//   return {
-//     db,
-//     client,
-//     schema,
-//     connectionLayer,
-//     tables,
-//   }
-// }
-
 export async function queryTable(
   client: Client.Client<string, Schema.Schema>,
-  connection: ReturnType<typeof makeSqliteConnectionFromDb>,
+  connectionLayer: ReturnType<typeof makeSqliteConnectionFromDb>,
   tableName: string,
 ) {
   const cols = await executeRaw(
     client,
-    connection,
+    connectionLayer,
     makeQueryTableCols(tableName),
   )
   const rows = await executeRaw(
     client,
-    connection,
+    connectionLayer,
     makeQueryTableAll(tableName),
   )
 
@@ -95,6 +135,25 @@ export async function queryTable(
     cols,
     rows,
   }
+}
+
+export async function update(
+  client: Client.Client<string, Schema.Schema>,
+  connectionLayer: ReturnType<typeof makeSqliteConnectionFromDb>,
+  tableName: string,
+  {
+    values,
+    where,
+  }: {
+    values: Record<string, unknown>
+    where: Record<string, unknown>
+  },
+) {
+  return pipe(
+    client.update(tableName, {values, where}),
+    T.provideSomeLayer(connectionLayer),
+    runMain,
+  )
 }
 
 async function executeRaw(
