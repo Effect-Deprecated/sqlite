@@ -41,6 +41,9 @@ importers:
   apps/editor:
     specifiers:
       '@effect-ts/core': ^0.60.2
+      '@effect-ts/otel': ^0.14.1
+      '@effect-ts/otel-exporter-trace-otlp-grpc': ^0.14.1
+      '@effect-ts/otel-sdk-trace-node': ^0.14.1
       '@effect-ts/system': ^0.57.4
       '@effect/sqlite': workspace:^
       '@effect/sqlite-react': workspace:^
@@ -53,6 +56,20 @@ importers:
       '@iconify/icons-icon-park-outline': ^1.2.6
       '@iconify/icons-noto': ^1.2.6
       '@iconify/react': ^4.0.0
+      '@opentelemetry/api': ^1.1.0
+      '@opentelemetry/api-metrics': ^0.31.0
+      '@opentelemetry/core': ^1.5.0
+      '@opentelemetry/exporter-metrics-otlp-http': ^0.31.0
+      '@opentelemetry/exporter-trace-otlp-grpc': 0.31.0
+      '@opentelemetry/exporter-trace-otlp-http': 0.31.0
+      '@opentelemetry/resources': 1.5.0
+      '@opentelemetry/sdk-metrics': ^0.32.0
+      '@opentelemetry/sdk-node': ^0.31.0
+      '@opentelemetry/sdk-trace-base': 1.5.0
+      '@opentelemetry/sdk-trace-node': 1.5.0
+      '@opentelemetry/sdk-trace-web': 1.5.0
+      '@opentelemetry/semantic-conventions': 1.5.0
+      '@opentelemetry/tracing': ^0.24.0
       '@tailwindcss/typography': ^0.5.7
       '@tanstack/react-location': ^3.7.4
       '@types/file-saver': ^2.0.5
@@ -66,6 +83,7 @@ importers:
       file-saver: ^2.0.5
       generouted: ^1.5.1
       leva: ^0.9.34
+      lodash: ^4.17.21
       marked: ^4.2.1
       postcss: ^8.4.18
       react: ^18.2.0
@@ -73,7 +91,7 @@ importers:
       react-responsive-carousel: ^3.2.23
       react-toastify: ^9.1.0
       sql.js: ^1.8.0
-      tailwindcss: ^3.2.1
+      tailwindcss: ^3.2.2
       tailwindcss-radix: ^2.6.1
       typescript: ^4.6.4
       vite: ^3.2.0
@@ -81,10 +99,13 @@ importers:
       zustand: ^4.1.4
     dependencies:
       '@effect-ts/core': 0.60.4
+      '@effect-ts/otel': 0.14.1_hkdx5ed7f26cjqynup4dg46tzu
+      '@effect-ts/otel-exporter-trace-otlp-grpc': 0.14.1_iib2445kyr4czqg3g53j4bq37u
+      '@effect-ts/otel-sdk-trace-node': 0.14.1_zkl32jti7hfz4nckwbiqq5nutq
       '@effect-ts/system': 0.57.4
       '@effect/sqlite': link:../../packages/sqlite
       '@effect/sqlite-react': link:../../packages/sqlite-react
-      '@glideapps/glide-data-grid': 5.1.4_uaejetjuiefvvzxnb6mjpuzhnq
+      '@glideapps/glide-data-grid': 5.1.4_mfxaf2m4ioxw4kq4ke4gqidxjy
       '@iconify/icons-arcticons': 1.2.29
       '@iconify/icons-codicon': 1.2.17
       '@iconify/icons-ep': 1.2.9
@@ -93,13 +114,28 @@ importers:
       '@iconify/icons-icon-park-outline': 1.2.6
       '@iconify/icons-noto': 1.2.6
       '@iconify/react': 4.0.0_react@18.2.0
-      '@tailwindcss/typography': 0.5.7_tailwindcss@3.2.1
+      '@opentelemetry/api': 1.2.0
+      '@opentelemetry/api-metrics': 0.31.0
+      '@opentelemetry/core': 1.7.0_@opentelemetry+api@1.2.0
+      '@opentelemetry/exporter-metrics-otlp-http': 0.31.0_@opentelemetry+api@1.2.0
+      '@opentelemetry/exporter-trace-otlp-grpc': 0.31.0_@opentelemetry+api@1.2.0
+      '@opentelemetry/exporter-trace-otlp-http': 0.31.0_@opentelemetry+api@1.2.0
+      '@opentelemetry/resources': 1.5.0_@opentelemetry+api@1.2.0
+      '@opentelemetry/sdk-metrics': 0.32.0_@opentelemetry+api@1.2.0
+      '@opentelemetry/sdk-node': 0.31.0_@opentelemetry+api@1.2.0
+      '@opentelemetry/sdk-trace-base': 1.5.0_@opentelemetry+api@1.2.0
+      '@opentelemetry/sdk-trace-node': 1.5.0_@opentelemetry+api@1.2.0
+      '@opentelemetry/sdk-trace-web': 1.5.0_@opentelemetry+api@1.2.0
+      '@opentelemetry/semantic-conventions': 1.5.0
+      '@opentelemetry/tracing': 0.24.0_@opentelemetry+api@1.2.0
+      '@tailwindcss/typography': 0.5.7_tailwindcss@3.2.2
       '@tanstack/react-location': 3.7.4_biqbaboplfbrettd7655fr4n2y
       classnames: 2.3.2
       daisyui: 2.38.0_lycaqaeny3mp632atgvyvqdgwe
       file-saver: 2.0.5
       generouted: 1.5.1_hxd5bmkgmvn6o4j6ngonxtveqq
       leva: 0.9.34_biqbaboplfbrettd7655fr4n2y
+      lodash: 4.17.21
       marked: 4.2.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
@@ -116,7 +152,7 @@ importers:
       '@vitejs/plugin-react': 2.2.0_vite@3.2.2
       autoprefixer: 10.4.13_postcss@8.4.18
       postcss: 8.4.18
-      tailwindcss: 3.2.1_postcss@8.4.18
+      tailwindcss: 3.2.2_postcss@8.4.18
       typescript: 4.8.4
       vite: 3.2.2
       vite-tsconfig-paths: 3.5.2_vite@3.2.2
@@ -603,7 +639,7 @@ packages:
     dev: false
     optional: true
 
-  /@glideapps/glide-data-grid/5.1.4_uaejetjuiefvvzxnb6mjpuzhnq:
+  /@glideapps/glide-data-grid/5.1.4_mfxaf2m4ioxw4kq4ke4gqidxjy:
     resolution: {integrity: sha512-YQ2fpIg1DdYumJcbokGH6zYc4+cOIyoWcVwO3GMiu6Tg1D2BsvTVf76m6QGICobHefqWeP0PMaBOENuTIUp9pg==}
     peerDependencies:
       lodash: ^4.17.19
@@ -613,6 +649,7 @@ packages:
       react-responsive-carousel: ^3.2.7
     dependencies:
       canvas-hypertxt: 0.0.7
+      lodash: 4.17.21
       marked: 4.2.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
@@ -1539,7 +1576,7 @@ packages:
       react: 18.2.0
     dev: false
 
-  /@tailwindcss/typography/0.5.7_tailwindcss@3.2.1:
+  /@tailwindcss/typography/0.5.7_tailwindcss@3.2.2:
     resolution: {integrity: sha512-JTTSTrgZfp6Ki4svhPA4mkd9nmQ/j9EfE7SbHJ1cLtthKkpW2OxsFXzSmxbhYbEkfNIyAyhle5p4SYyKRbz/jg==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders'
@@ -1548,7 +1585,7 @@ packages:
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       postcss-selector-parser: 6.0.10
-      tailwindcss: 3.2.1_postcss@8.4.18
+      tailwindcss: 3.2.2_postcss@8.4.18
     dev: false
 
   /@tanstack/react-location/3.7.4_biqbaboplfbrettd7655fr4n2y:
@@ -2385,7 +2422,7 @@ packages:
       css-selector-tokenizer: 0.8.0
       postcss: 8.4.18
       postcss-js: 4.0.0_postcss@8.4.18
-      tailwindcss: 3.2.1_postcss@8.4.18
+      tailwindcss: 3.2.2_postcss@8.4.18
     transitivePeerDependencies:
       - ts-node
     dev: false
@@ -3977,7 +4014,6 @@ packages:
 
   /lodash/4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
-    dev: true
 
   /long/4.0.0:
     resolution: {integrity: sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==}
@@ -5254,8 +5290,8 @@ packages:
     resolution: {integrity: sha512-ejh4BHkn/3g349l+JiEW6I4//uclU4nllEqnOK3/8zpORscIk9WbjLyYR2UzqwVRjjzgd72I/hMDJZm3+XO48w==}
     dev: false
 
-  /tailwindcss/3.2.1_postcss@8.4.18:
-    resolution: {integrity: sha512-Uw+GVSxp5CM48krnjHObqoOwlCt5Qo6nw1jlCRwfGy68dSYb/LwS9ZFidYGRiM+w6rMawkZiu1mEMAsHYAfoLg==}
+  /tailwindcss/3.2.2_postcss@8.4.18:
+    resolution: {integrity: sha512-c2GtSdqg+harR4QeoTmex0Ngfg8IIHNeLQH5yr2B9uZbZR1Xt1rYbjWOWTcj3YLTZhrmZnPowoQDbSRFyZHQ5Q==}
     engines: {node: '>=12.13.0'}
     hasBin: true
     peerDependencies:
