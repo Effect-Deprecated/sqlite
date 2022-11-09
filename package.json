@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "pnpm --filter @effect/sqlite build",
+    "build": "pnpm build:sqlite; pnpm build:sqlite-react; pnpm build:editor",
     "build:sqlite": "pnpm --filter @effect/sqlite build",
     "build:sqlite-react": "pnpm --filter @effect/sqlite-react build",
     "build:editor": "pnpm --filter @effect/sqlite-editor build",
