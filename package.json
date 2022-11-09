@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "pnpm --filter @effect/sqlite build",
+    "build:sqlite": "pnpm --filter @effect/sqlite build",
+    "build:sqlite-react": "pnpm --filter @effect/sqlite-react build",
+    "build:editor": "pnpm --filter @effect/sqlite-editor build",
     "test": "ultra -r test",
     "test:watch": "ultra -r test:watch",
     "watch": "ultra -r watch",
@@ -29,6 +32,7 @@
     "rimraf": "^3.0.2",
     "typescript": "^4.8.4",
     "ultra-runner": "^3.10.5",
+    "vercel": "^28.4.17",
     "vitest": "^0.24.4"
   }
 }
