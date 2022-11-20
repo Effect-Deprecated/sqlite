@@ -7,14 +7,64 @@ import {provideOtelTracer} from 'utils/dummy-tracer.js'
 import type {OT} from 'utils/effect.js'
 import {pipe, T} from 'utils/effect.js'
 
-import {Column, Table} from './types'
+import {Column, Connection, Table} from './types'
 
 export type SqliteConnection = ReturnType<typeof makeSqliteConnectionFromDb>
 export type SqliteClient = Client.Client<string, Schema.Schema>
 export type SqliteDatabase = Database
 export type SqliteSchema = Schema.Schema
 
-export async function connect(
+const getBaseUrl = () => document.location.origin
+
+const bufferFromFile = (file: File): Promise<ArrayBuffer> =>
+  new Promise((rs, rj) => {
+    const r = new FileReader()
+    r.onload = function () {
+      if (r.result instanceof ArrayBuffer) {
+        rs(r.result)
+      } else {
+        rj(new Error(`Cannot return Uint8Array`))
+      }
+    }
+    r.readAsArrayBuffer(file)
+  })
+
+export async function connectFile(
+  name: string,
+  file: File,
+  schemaSource: Schema.Schema = {tables: {}},
+) {
+  const schema = Schema.defineSchema(schemaSource)
+  const client = new Client.Client(name, schema)
+
+  const sql = await initSqlJs({
+    locateFile: () => `/sql-wasm.wasm`,
+  })
+
+  const buffer = await bufferFromFile(file)
+  const db = new sql.Database(new Uint8Array(buffer))
+  const connectionLayer = makeSqliteConnectionFromDb(name, db)
+
+  const tables = await executeRaw(client, connectionLayer, plainQueryTables)
+
+  const schemaExtractedSource = await extractSchema(
+    client,
+    connectionLayer,
+    tables as Table[],
+  )
+
+  const schemaExtracted = Schema.defineSchema(schemaExtractedSource)
+
+  return {
+    db,
+    client: new Client.Client(name, schemaExtracted),
+    schema: schemaExtracted,
+    connectionLayer,
+    tables,
+  }
+}
+
+export async function connectUrl(
   name: string,
   url: URL,
   schemaSource: Schema.Schema = {tables: {}},
@@ -53,6 +103,19 @@ export async function connect(
     connectionLayer,
     tables,
   }
+}
+
+export async function connect(conn: Connection) {
+  if (conn.type === `remote` && conn.url) {
+    const url = new URL(conn.url, getBaseUrl())
+    return connectUrl(conn.name, url)
+  }
+
+  if (conn.type === `local` && conn.file) {
+    return connectFile(conn.name, conn.file)
+  }
+
+  throw new Error(`Connection failed`)
 }
 
 async function extractSchema(

@@ -1,15 +1,16 @@
 import {saveAs} from 'file-saver'
+import {nanoid} from 'nanoid'
 import createStore from 'zustand/vanilla'
 import {subscribeWithSelector} from 'zustand/middleware'
 
 import {
-  connect,
   queryTable,
   SqliteDatabase,
   SqliteConnection,
   SqliteSchema,
   SqliteClient,
   update,
+  connect,
 } from './api'
 import type {Connection, Column, Table, Row, Message} from './types'
 
@@ -27,17 +28,23 @@ type Store = {
   rows: Row[]
   cols: Column[]
 
-  jsonView: boolean
-
-  tableView: boolean
+  viewJson: boolean
+  viewSettings: boolean
+  viewTable: boolean
 
   message: Message | null
 
-  jsonViewSwitch: () => void
-  tableViewSwitch: () => void
+  viewJsonSwitch: () => void
+  viewSettingsEnable: () => void
+  viewSettingsDisable: () => void
+  viewTableSwitch: () => void
 
-  connect: (name: string) => void
+  createFromFileList: (fileList: File[]) => void
+  connect: (id: string) => void
+  copy: (id: string) => void
   reconnect: () => void
+  remove: (id: string) => void
+  update: (params: Partial<Connection> & {id: string}) => void
   download: () => void
 
   tableOpen: (tableName: string) => void
@@ -46,7 +53,7 @@ type Store = {
   tableUpdateRow: (rowIndex: number, values: Record<string, any>) => void
 }
 
-const getBaseUrl = () => document.location.origin
+const getFileName = (name: string) => name.split(`.`)[0] || name
 
 export const store = createStore(
   subscribeWithSelector<Store>((set, get) => ({
@@ -55,7 +62,7 @@ export const store = createStore(
     schema: null,
     connectionLayer: null,
 
-    connections: mockConnections(),
+    connections: [],
     selectedConnection: null,
 
     tables: [],
@@ -63,15 +70,33 @@ export const store = createStore(
     rows: [],
     cols: [],
 
-    jsonView: false,
-    tableView: true,
+    viewJson: false,
+    viewSettings: false,
+    viewTable: true,
 
     message: null,
 
-    jsonViewSwitch: () => set((state) => ({jsonView: !state.jsonView})),
-    tableViewSwitch: () => set((state) => ({tableView: !state.tableView})),
+    viewJsonSwitch: () => set((state) => ({viewJson: !state.viewJson})),
 
-    async connect(name) {
+    viewSettingsEnable: () => set(() => ({viewSettings: true})),
+    viewSettingsDisable: () => set(() => ({viewSettings: false})),
+
+    viewTableSwitch: () => set((state) => ({viewTable: !state.viewTable})),
+
+    createFromFileList(fileList) {
+      set(({connections}) => ({
+        connections: connections.concat(
+          fileList.map((file) => ({
+            id: nanoid(),
+            type: `local`,
+            name: getFileName(file.name),
+            file,
+          })),
+        ),
+      }))
+    },
+
+    async connect(id) {
       const fnName = `connect`
       const {
         connections,
@@ -80,26 +105,27 @@ export const store = createStore(
         selectedTable,
         selectedConnection,
       } = get()
-      const currentConnection = connections.find((v) => v.name === name)
+      const currentConnection = connections.find((v) => v.id === id)
 
-      if (currentConnection && currentConnection.url) {
-        const url = new URL(currentConnection.url, getBaseUrl())
+      if (currentConnection) {
+        const name = currentConnection.name
+
         const {db, client, schema, connectionLayer, tables} = await connect(
-          currentConnection.name,
-          url,
+          currentConnection,
         )
+
         set({
           db,
           client,
           schema,
           connectionLayer,
           tables: tables as Table[],
-          selectedConnection: name,
+          selectedConnection: id,
           message: successMessage(fnName, [name]),
         })
 
         if (selectedTable) {
-          if (selectedConnection !== name) {
+          if (selectedConnection !== id) {
             tableClose()
           } else {
             tableOpen(selectedTable)
@@ -107,7 +133,7 @@ export const store = createStore(
         }
       } else {
         set(() => ({
-          message: errorMessage(fnName, [name], `No such connection`),
+          message: errorMessage(fnName, [id], `No such connection`),
         }))
       }
     },
@@ -120,11 +146,39 @@ export const store = createStore(
     },
 
     download() {
-      const {db} = get()
-      if (db) {
+      const {db, connections, selectedConnection} = get()
+      const currentConn = connections.find((v) => v.id === selectedConnection)
+      if (currentConn && db) {
         const blob = new Blob([db.export()], {type: `application/vnd.sqlite3`})
-        saveAs(blob, `db.sqlite`)
+        saveAs(blob, `${currentConn.name}.sqlite`)
       }
+    },
+
+    copy(id: string) {
+      const {connections} = get()
+      const currentConn = connections.find((v) => v.id === id)
+      if (currentConn) {
+        set(() => ({
+          connections: connections.concat({
+            ...currentConn,
+            id: nanoid(),
+          }),
+        }))
+      }
+    },
+
+    update(params) {
+      set(({connections}) => ({
+        connections: connections.map((conn) =>
+          conn.id === params.id ? Object.assign(conn, params) : conn,
+        ),
+      }))
+    },
+
+    remove(id: string) {
+      set(({connections}) => ({
+        connections: connections.filter((conn) => conn.id !== id),
+      }))
     },
 
     async tableOpen(tableName: string) {
@@ -215,26 +269,6 @@ const errorMessage = (
   type: `error`,
   value: `${label}(${args.join(', ')})` + (error ? ` => ${error}` : ``),
 })
-
-function mockConnections(): Connection[] {
-  return [
-    {
-      name: `primary`,
-      type: `remote`,
-      url: `/1.sqlite`,
-    },
-    {
-      name: `secondary`,
-      type: `remote`,
-      url: `/2.sqlite`,
-    },
-    {
-      name: `downloaded`,
-      type: `remote`,
-      url: `/db.sqlite`,
-    },
-  ]
-}
 
 const getPrimaryKeys = (cols: Column[]) =>
   cols.filter((v) => v.pk).map((v) => v.name)

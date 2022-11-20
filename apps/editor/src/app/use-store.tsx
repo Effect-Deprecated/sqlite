@@ -10,10 +10,17 @@ export const useConnections = () =>
   useStore((state) => ({
     connections: state.connections,
     selectedConnection: state.selectedConnection,
+    viewSettings: state.viewSettings,
     run: {
-      download: state.download,
       connect: state.connect,
+      copy: state.copy,
+      createFromFileList: state.createFromFileList,
+      download: state.download,
+      update: state.update,
       reconnect: state.reconnect,
+      remove: state.remove,
+      viewSettingsEnable: state.viewSettingsEnable,
+      viewSettingsDisable: state.viewSettingsDisable,
     },
   }))
 
@@ -23,11 +30,11 @@ export const useTables = () =>
     selectedTable: state.selectedTable,
     rows: state.rows,
     cols: state.cols,
-    jsonView: state.jsonView,
-    tableView: state.tableView,
+    jsonView: state.viewJson,
+    tableView: state.viewTable,
     run: {
-      jsonViewSwitch: state.jsonViewSwitch,
-      tableViewSwitch: state.tableViewSwitch,
+      jsonViewSwitch: state.viewJsonSwitch,
+      tableViewSwitch: state.viewTableSwitch,
       tableOpen: state.tableOpen,
       tableClose: state.tableClose,
       tableRefresh: state.tableRefresh,

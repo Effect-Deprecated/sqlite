@@ -1,7 +1,9 @@
 export type Connection = {
+  id: string
   name: string
-  type: `remote` | `local`
+  type: `remote` | `local` | `empty`
   url?: string
+  file?: File
 }
 
 export type Table = {

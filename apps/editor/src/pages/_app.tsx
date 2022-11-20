@@ -8,7 +8,7 @@ import {SectionHeader} from 'ui/section-header'
 import {useMessage} from 'app/use-store'
 import {Message} from 'app/types'
 
-export default function App({children}: {children: React.ReactNode}) {
+export default function App(props: {children: React.ReactNode}) {
   useMessage(
     React.useCallback((message) => {
       if (message) {
@@ -25,7 +25,7 @@ export default function App({children}: {children: React.ReactNode}) {
     <>
       <Screen>
         <SectionHeader className="pt-2" />
-        <main>{children}</main>
+        <main className="flex grow">{props.children}</main>
       </Screen>
 
       <ToastContainer
