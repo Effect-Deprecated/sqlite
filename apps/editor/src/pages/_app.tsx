@@ -2,11 +2,25 @@ import 'react-toastify/dist/ReactToastify.min.css'
 
 import {ToastContainer, toast, Flip} from 'react-toastify'
 
+import * as React from 'react'
 import {Screen} from 'ui/screen'
 import {SectionHeader} from 'ui/section-header'
-// import type {Message} from 'app/types'
+import {useMessage} from 'app/use-store'
+import {Message} from 'app/types'
 
 export default function App({children}: {children: React.ReactNode}) {
+  useMessage(
+    React.useCallback((message) => {
+      if (message) {
+        if (message.type === `error`) {
+          toastError(message)
+        } else {
+          toastSuccess(message)
+        }
+      }
+    }, []),
+  )
+
   return (
     <>
       <Screen>
@@ -24,17 +38,8 @@ export default function App({children}: {children: React.ReactNode}) {
   )
 }
 
-// const toastError = ({value}: Message) =>
-//   toast.error(
-//     <div className="flex items-center gap-2">
-//       <Icon icon={connectionIcon} />
-//       {value}
-//     </div>,
-//   )
-// const toastSuccess = ({value}: Message) =>
-//   toast.success(
-//     <div className="flex items-center gap-2">
-//       <Icon icon={connectionIcon} />
-//       {value}
-//     </div>,
-//   )
+const toastError = ({value}: Message) =>
+  toast.error(<div className="flex items-center gap-2">{value}</div>)
+
+const toastSuccess = ({value}: Message) =>
+  toast.success(<div className="flex items-center gap-2">{value}</div>)

@@ -1,15 +1,20 @@
 import cx from 'classnames'
 import * as React from 'react'
 
-import connectionIcon from '@iconify/icons-mdi/connection'
-import tableIcon from '@iconify/icons-mdi/table'
 import {Icon, IconifyIcon} from '@iconify/react'
 import {useConnections, useTables} from 'app/use-store'
 
+import connectionIcon from '@iconify/icons-mdi/connection'
+import tableIcon from '@iconify/icons-mdi/table'
 import refreshIcon from '@iconify/icons-icon-park-outline/refresh'
 import copyIcon from '@iconify/icons-icon-park-outline/copy'
 import snapshotIcon from '@iconify/icons-icon-park-outline/copy-link'
 import removeCircleOutline from '@iconify/icons-ion/remove-circle-outline'
+import downloadIcon from '@iconify/icons-mdi/download'
+import linkPlus from '@iconify/icons-mdi/link-plus'
+import databasePlus from '@iconify/icons-mdi/database-plus'
+import uploadIcon from '@iconify/icons-mdi/upload'
+import renameBox from '@iconify/icons-mdi/rename-box'
 
 export function SectionSidebar(props: {
   className?: string
@@ -36,24 +41,57 @@ function BlockMenuSidebar() {
 function BlockMenuConnections() {
   const fromConnections = useConnections()
 
+  const actions = (
+    <div>
+      <ButtonAction icon={linkPlus} tooltip="+ empty" />
+      <ButtonAction icon={databasePlus} tooltip="+ url" />
+      <ButtonAction icon={uploadIcon} tooltip="upload" />
+    </div>
+  )
+
   return (
-    <BlockMenu icon={<Icon icon={connectionIcon} />} title={`Connections`}>
-      {fromConnections.connections.map((conn) => (
-        <BlockMenuItem
-          key={conn.name}
-          className="group justify-between gap-2"
-          active={fromConnections.selectedConnection === conn.name}
-          label={conn.name}
-          onClick={fromConnections.run.connect}
-        >
-          <div className="opacity-0 group-hover:opacity-100">
-            <ButtonAction icon={refreshIcon} tooltip="refresh" />
-            <ButtonAction icon={copyIcon} tooltip="copy" />
-            <ButtonAction icon={snapshotIcon} tooltip="snapshot" />
-            <ButtonAction icon={removeCircleOutline} tooltip="remove" />
-          </div>
-        </BlockMenuItem>
-      ))}
+    <BlockMenu
+      actions={actions}
+      icon={<Icon icon={connectionIcon} />}
+      title={`Connections`}
+    >
+      {fromConnections.connections.map((conn) => {
+        const active = fromConnections.selectedConnection === conn.name
+
+        return (
+          <BlockMenuItem
+            key={conn.name}
+            className="group justify-between gap-2"
+            active={active}
+            label={conn.name}
+            onClick={fromConnections.run.connect}
+          >
+            <div
+              className={cx(`group-hover:opacity-100`, {
+                'opacity-0': !active,
+              })}
+            >
+              <ButtonAction
+                icon={refreshIcon}
+                tooltip="refresh"
+                onClick={fromConnections.run.reconnect}
+              />
+              <ButtonAction icon={renameBox} tooltip="rename" />
+              <ButtonAction icon={copyIcon} tooltip="copy" />
+              <ButtonAction icon={snapshotIcon} tooltip="snapshot" />
+              <ButtonAction
+                icon={downloadIcon}
+                tooltip="download"
+                onClick={fromConnections.run.download}
+              />
+              <ButtonAction
+                icon={removeCircleOutline}
+                tooltip="remove (twice click)"
+              />
+            </div>
+          </BlockMenuItem>
+        )
+      })}
     </BlockMenu>
   )
 }
@@ -96,16 +134,20 @@ function BlockMenuQueries() {
 }
 
 function BlockMenu(props: {
+  actions?: React.ReactNode
   icon: React.ReactNode
   title: string
   children?: React.ReactNode
 }) {
   return (
     <div className="space-y-2">
-      <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-widest">
-        {props.icon}
-        {props.title}
-      </h2>
+      <div className="group flex justify-between">
+        <h2 className="flex select-none items-center gap-2 text-sm font-semibold uppercase tracking-widest">
+          {props.icon}
+          {props.title}
+        </h2>
+        {props.actions}
+      </div>
       <div className="flex flex-col space-y-1">{props.children}</div>
     </div>
   )
