@@ -1,9 +1,23 @@
+import {Client, Schema} from '@effect/sqlite'
+import type {Database} from 'sql.js'
+import {makeSqliteConnectionFromDb} from '@effect/sqlite/browser'
+
+export type SqliteConnection = ReturnType<typeof makeSqliteConnectionFromDb>
+export type SqliteClient = Client.Client<string, Schema.Schema>
+export type SqliteDatabase = Database
+export type SqliteSchema = Schema.Schema
+
 export type Connection = {
   id: string
   name: string
   type: `remote` | `local` | `empty`
   url?: string
   file?: File
+  db?: SqliteDatabase
+  client?: SqliteClient
+  schema?: SqliteSchema
+  connectionLayer?: SqliteConnection
+  tables?: Table[]
 }
 
 export type Table = {

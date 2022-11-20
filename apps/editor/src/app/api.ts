@@ -1,4 +1,4 @@
-import initSqlJs, {Database} from 'sql.js'
+import initSqlJs from 'sql.js'
 
 import {Client, Schema} from '@effect/sqlite'
 import {makeSqliteConnectionFromDb} from '@effect/sqlite/browser'
@@ -8,11 +8,6 @@ import type {OT} from 'utils/effect.js'
 import {pipe, T} from 'utils/effect.js'
 
 import {Column, Connection, Table} from './types'
-
-export type SqliteConnection = ReturnType<typeof makeSqliteConnectionFromDb>
-export type SqliteClient = Client.Client<string, Schema.Schema>
-export type SqliteDatabase = Database
-export type SqliteSchema = Schema.Schema
 
 const getBaseUrl = () => document.location.origin
 
@@ -28,6 +23,39 @@ const bufferFromFile = (file: File): Promise<ArrayBuffer> =>
     }
     r.readAsArrayBuffer(file)
   })
+
+export async function connectEmpty(
+  name: string,
+  schemaSource: Schema.Schema = {tables: {}},
+) {
+  const schema = Schema.defineSchema(schemaSource)
+  const client = new Client.Client(name, schema)
+
+  const sql = await initSqlJs({
+    locateFile: () => `/sql-wasm.wasm`,
+  })
+
+  const db = new sql.Database()
+  const connectionLayer = makeSqliteConnectionFromDb(name, db)
+
+  const tables = await executeRaw(client, connectionLayer, plainQueryTables)
+
+  const schemaExtractedSource = await extractSchema(
+    client,
+    connectionLayer,
+    tables as Table[],
+  )
+
+  const schemaExtracted = Schema.defineSchema(schemaExtractedSource)
+
+  return {
+    db,
+    client: new Client.Client(name, schemaExtracted),
+    schema: schemaExtracted,
+    connectionLayer,
+    tables: tables as Table[],
+  }
+}
 
 export async function connectFile(
   name: string,
@@ -60,7 +88,7 @@ export async function connectFile(
     client: new Client.Client(name, schemaExtracted),
     schema: schemaExtracted,
     connectionLayer,
-    tables,
+    tables: tables as Table[],
   }
 }
 
@@ -101,7 +129,7 @@ export async function connectUrl(
     client: new Client.Client(name, schemaExtracted),
     schema: schemaExtracted,
     connectionLayer,
-    tables,
+    tables: tables as Table[],
   }
 }
 
@@ -113,6 +141,10 @@ export async function connect(conn: Connection) {
 
   if (conn.type === `local` && conn.file) {
     return connectFile(conn.name, conn.file)
+  }
+
+  if (conn.type === `empty`) {
+    return connectEmpty(conn.name)
   }
 
   throw new Error(`Connection failed`)

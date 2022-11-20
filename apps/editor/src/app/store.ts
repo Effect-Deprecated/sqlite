@@ -3,16 +3,18 @@ import {nanoid} from 'nanoid'
 import createStore from 'zustand/vanilla'
 import {subscribeWithSelector} from 'zustand/middleware'
 
-import {
-  queryTable,
+import {queryTable, update, connect} from './api'
+import type {
+  Connection,
+  Column,
+  Table,
+  Row,
+  Message,
   SqliteDatabase,
   SqliteConnection,
   SqliteSchema,
   SqliteClient,
-  update,
-  connect,
-} from './api'
-import type {Connection, Column, Table, Row, Message} from './types'
+} from './types'
 
 type Store = {
   db: SqliteDatabase | null
@@ -39,8 +41,9 @@ type Store = {
   viewSettingsDisable: () => void
   viewTableSwitch: () => void
 
+  createEmpty: () => void
   createFromFileList: (fileList: File[]) => void
-  connect: (id: string) => void
+  connect: (id: string, force?: boolean) => void
   copy: (id: string) => void
   reconnect: () => void
   remove: (id: string) => void
@@ -83,6 +86,16 @@ export const store = createStore(
 
     viewTableSwitch: () => set((state) => ({viewTable: !state.viewTable})),
 
+    createEmpty() {
+      set(({connections}) => ({
+        connections: connections.concat({
+          id: nanoid(),
+          name: `empty`,
+          type: `empty`,
+        }),
+      }))
+    },
+
     createFromFileList(fileList) {
       set(({connections}) => ({
         connections: connections.concat(
@@ -96,7 +109,7 @@ export const store = createStore(
       }))
     },
 
-    async connect(id) {
+    async connect(id, force = false) {
       const fnName = `connect`
       const {
         connections,
@@ -110,9 +123,12 @@ export const store = createStore(
       if (currentConnection) {
         const name = currentConnection.name
 
-        const {db, client, schema, connectionLayer, tables} = await connect(
-          currentConnection,
-        )
+        const connInfo =
+          alreadyConnected(currentConnection) && !force
+            ? currentConnection
+            : await connect(currentConnection)
+
+        const {db, client, schema, connectionLayer, tables} = connInfo
 
         set({
           db,
@@ -122,6 +138,18 @@ export const store = createStore(
           tables: tables as Table[],
           selectedConnection: id,
           message: successMessage(fnName, [name]),
+          connections: connections.map((conn) =>
+            conn.id === id
+              ? {
+                  ...currentConnection,
+                  db,
+                  client,
+                  schema,
+                  connectionLayer,
+                  tables,
+                }
+              : conn,
+          ),
         })
 
         if (selectedTable) {
@@ -141,7 +169,7 @@ export const store = createStore(
     reconnect() {
       const {connect, selectedConnection} = get()
       if (selectedConnection) {
-        connect(selectedConnection)
+        connect(selectedConnection, true)
       }
     },
 
@@ -161,6 +189,11 @@ export const store = createStore(
         set(() => ({
           connections: connections.concat({
             ...currentConn,
+            db: undefined,
+            client: undefined,
+            schema: undefined,
+            connectionLayer: undefined,
+            tables: undefined,
             id: nanoid(),
           }),
         }))
@@ -251,6 +284,16 @@ export const store = createStore(
     },
   })),
 )
+
+function alreadyConnected(conn: Connection) {
+  return Boolean(
+    conn.db &&
+      conn.client &&
+      conn.connectionLayer &&
+      conn.schema &&
+      conn.tables,
+  )
+}
 
 const successMessage = (
   label: string,

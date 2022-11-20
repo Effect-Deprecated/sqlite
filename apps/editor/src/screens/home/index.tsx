@@ -26,19 +26,17 @@ export function ScreenHome() {
 function DropZone(props: {children?: React.ReactNode}) {
   const {run} = useConnections()
 
-  const onDrop = React.useCallback((acceptedFiles: File[]) => {
-    run.createFromFileList(acceptedFiles)
-  }, [])
-  const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
+  const {getRootProps, getInputProps, isDragActive} = useDropzone({
+    onDrop: run.createFromFileList,
+  })
 
   return (
     <div {...getRootProps()} className="flex grow">
       {isDragActive ? (
         <>
           <input {...getInputProps()} />
-
           <div className="m-4 flex grow items-center justify-center border border-dashed">
-            Drop the files here ...
+            Drop the files here
           </div>
         </>
       ) : (
@@ -87,9 +85,7 @@ function BlockConnectionSettingsForm(props: {
   onRemove?: () => void
 }) {
   const {connection} = props
-
   const [removeName, setRemoveName] = React.useState(``)
-
   const removeEq = connection.name === removeName
 
   return (

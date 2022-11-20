@@ -14,6 +14,7 @@ export const useConnections = () =>
     run: {
       connect: state.connect,
       copy: state.copy,
+      createEmpty: state.createEmpty,
       createFromFileList: state.createFromFileList,
       download: state.download,
       update: state.update,

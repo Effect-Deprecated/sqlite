@@ -41,7 +41,11 @@ function BlockMenuConnections() {
 
   const actions = (
     <div>
-      <ButtonAction icon={linkPlus} tooltip="+ empty" />
+      <ButtonAction
+        icon={linkPlus}
+        tooltip="+ empty"
+        onClick={fromConnections.run.createEmpty}
+      />
       <ButtonAction icon={databasePlus} tooltip="+ url" />
       <ButtonAction icon={uploadIcon} tooltip="upload" />
     </div>
@@ -71,7 +75,7 @@ function BlockMenuConnections() {
             >
               <ButtonAction
                 icon={refreshIcon}
-                tooltip="refresh"
+                tooltip="refresh (not downloaded data will be lost)"
                 onClick={fromConnections.run.reconnect}
               />
               <ButtonAction
