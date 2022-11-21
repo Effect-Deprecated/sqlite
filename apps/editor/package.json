@@ -27,6 +27,7 @@
     "@iconify/icons-mdi": "^1.2.32",
     "@iconify/icons-noto": "^1.2.6",
     "@iconify/react": "^4.0.0",
+    "@monaco-editor/react": "^4.4.6",
     "@opentelemetry/api": "^1.1.0",
     "@opentelemetry/api-metrics": "^0.31.0",
     "@opentelemetry/core": "^1.5.0",
@@ -56,6 +57,7 @@
     "react-dropzone": "^14.2.3",
     "react-responsive-carousel": "^3.2.23",
     "react-toastify": "^9.1.0",
+    "sql-formatter": "^12.0.2",
     "sql.js": "^1.8.0",
     "tailwindcss-radix": "^2.6.1",
     "zustand": "^4.1.4"

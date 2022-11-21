@@ -41,13 +41,23 @@ function BlockMenuConnections() {
 
   const actions = (
     <div>
+      <input
+        id="file"
+        type="file"
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files) {
+            fromConnections.run.createFromFileList([...e.target.files])
+          }
+        }}
+      />
       <ButtonAction
         icon={linkPlus}
         tooltip="+ empty"
         onClick={fromConnections.run.createEmpty}
       />
-      <ButtonAction icon={databasePlus} tooltip="+ url" />
-      <ButtonAction icon={uploadIcon} tooltip="upload" />
+      <ButtonAction disabled icon={databasePlus} tooltip="+ url" />
+      <ButtonAction for="file" icon={uploadIcon} tooltip="upload" />
     </div>
   )
 
@@ -102,15 +112,24 @@ function BlockMenuConnections() {
 }
 
 function ButtonAction(props: {
+  for?: string
+  disabled?: boolean
   tooltip?: string
   icon: IconifyIcon | string
   onClick?: () => void
 }) {
   return (
     <div className="tooltip tooltip-top" data-tip={props.tooltip}>
-      <button className="btn btn-ghost btn-xs" onClick={props.onClick}>
-        <Icon icon={props.icon} />
-      </button>
+      <label htmlFor={props.for}>
+        <a
+          className={cx('btn btn-ghost btn-xs', {
+            'btn-disabled': props.disabled,
+          })}
+          onClick={props.onClick}
+        >
+          <Icon icon={props.icon} />
+        </a>
+      </label>
     </div>
   )
 }

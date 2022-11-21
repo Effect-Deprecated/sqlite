@@ -9,6 +9,9 @@ import {
   GridCellKind,
   Item,
 } from '@glideapps/glide-data-grid'
+
+import {BlockSqlConsole} from './block-sql-console'
+
 import {useTables} from 'app/use-store'
 
 const getValue = (
@@ -27,11 +30,14 @@ export function BlockStyledTableView() {
   }
 
   return (
-    <div className="bg-base-200 flex flex-grow flex-col space-y-4 self-start rounded-xl p-4 text-sm">
-      <div className="prose">
-        <h2>Table: {selectedTable}</h2>
+    <div className="flex grow flex-col gap-2">
+      <BlockSqlConsole />
+      <div className="bg-base-200 flex flex-col space-y-4 self-stretch rounded-xl p-4 text-sm">
+        <div className="prose">
+          <h2>Table: {selectedTable}</h2>
+        </div>
+        <BlockTableView />
       </div>
-      <BlockTableView />
     </div>
   )
 }
