@@ -98,6 +98,7 @@ export function BlockTableView() {
       columns={columns}
       rows={rows.length}
       onCellEdited={onCellEdited}
+      width="100%"
     />
   )
 }

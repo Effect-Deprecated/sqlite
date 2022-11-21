@@ -86,10 +86,21 @@ function BlockConnectionSettingsForm(props: {
 }) {
   const {connection} = props
   const [removeName, setRemoveName] = React.useState(``)
+  const [showRemove, setShowRemove] = React.useState(false)
   const removeEq = connection.name === removeName
 
+  function _onRemove() {
+    if (showRemove) {
+      if (removeEq) {
+        props.onRemove?.()
+      }
+    } else {
+      setShowRemove(true)
+    }
+  }
+
   return (
-    <div>
+    <div className="flex flex-col gap-1">
       <Input
         label={`Name (${connection.type})`}
         placeholder="Connection name"
@@ -97,21 +108,24 @@ function BlockConnectionSettingsForm(props: {
         onChangeValue={props.onChangeName}
       />
       <div className="flex items-end gap-2">
-        <Input
-          classNameInput={removeEq ? 'input-success' : 'input-error'}
-          label={`Enter connection name and click the button to delete it`}
-          placeholder="Remove name"
-          value={removeName}
-          onChangeValue={setRemoveName}
-        />
-        <button
-          className={cx('btn btn-ghost')}
-          onClick={() => removeEq && props.onRemove?.()}
-        >
-          <Icon
-            icon={removeCircleOutline}
-            className={removeEq ? `text-success` : `text-error`}
+        {showRemove ? (
+          <Input
+            classNameInput={removeEq ? 'input-success' : 'input-error'}
+            label={`Enter connection "${connection.name}" name and click the button to delete it`}
+            placeholder="Remove name"
+            value={removeName}
+            onChangeValue={setRemoveName}
           />
+        ) : null}
+        <button
+          className={cx(
+            'btn btn-ghost gap-1',
+            removeEq ? `text-success` : `text-error`,
+          )}
+          onClick={_onRemove}
+        >
+          <Icon icon={removeCircleOutline} />
+          Remove
         </button>
       </div>
     </div>
