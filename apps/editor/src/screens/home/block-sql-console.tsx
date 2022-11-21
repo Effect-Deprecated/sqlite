@@ -6,6 +6,7 @@ import playIcon from '@iconify/icons-mdi/play'
 
 export function BlockSqlConsole() {
   const [value, setValue] = React.useState(`SELECT * FROM users`)
+  const [editor, setEditor] = React.useState<any>(null)
   const monaco = useMonaco()
 
   React.useEffect(() => {
@@ -24,6 +25,21 @@ export function BlockSqlConsole() {
     }
   }, [monaco])
 
+  React.useEffect(() => {
+    if (editor) {
+      const layout = () => {
+        editor.layout({
+          width: `auto`,
+          height: `10vh`,
+        })
+      }
+
+      window.addEventListener('resize', layout)
+
+      return () => window.removeEventListener('resize', layout)
+    }
+  }, [editor])
+
   return (
     <div className="bg-base-200 flex flex-col space-y-1 self-stretch rounded-xl p-4 text-sm">
       <div className="flex">
@@ -38,11 +54,12 @@ export function BlockSqlConsole() {
         </button>
       </div>
       <Editor
-        height="20vh"
         theme="vs-dark"
+        height="15vh"
         defaultLanguage="sql"
         value={value}
         onChange={(value) => value && setValue(value)}
+        onMount={setEditor}
       />
     </div>
   )
