@@ -58,6 +58,11 @@ type Store = {
 
 const getFileName = (name: string) => name.split(`.`)[0] || name
 
+const neededFirstConn = (
+  selectedConnection: string | null,
+  connections: Connection[],
+) => !selectedConnection && connections.length === 0
+
 export const store = createStore(
   subscribeWithSelector<Store>((set, get) => ({
     db: null,
@@ -87,26 +92,42 @@ export const store = createStore(
     viewTableSwitch: () => set((state) => ({viewTable: !state.viewTable})),
 
     createEmpty() {
+      const {connections, selectedConnection, connect} = get()
+      const id = nanoid()
+
       set(({connections}) => ({
         connections: connections.concat({
-          id: nanoid(),
+          id,
           name: `empty`,
           type: `empty`,
         }),
       }))
+
+      if (neededFirstConn(selectedConnection, connections)) {
+        connect(id)
+      }
     },
 
     createFromFileList(fileList) {
-      set(({connections}) => ({
-        connections: connections.concat(
-          fileList.map((file) => ({
-            id: nanoid(),
-            type: `local`,
-            name: getFileName(file.name),
-            file,
-          })),
-        ),
+      const {connections, selectedConnection, connect} = get()
+
+      const newConnectionsList: Connection[] = fileList.map((file) => ({
+        id: nanoid(),
+        type: `local`,
+        name: getFileName(file.name),
+        file,
       }))
+
+      set(({connections}) => ({
+        connections: connections.concat(newConnectionsList),
+      }))
+
+      if (
+        neededFirstConn(selectedConnection, connections) &&
+        newConnectionsList[0]
+      ) {
+        connect(newConnectionsList[0].id)
+      }
     },
 
     async connect(id, force = false) {
@@ -154,9 +175,22 @@ export const store = createStore(
 
         if (selectedTable) {
           if (selectedConnection !== id) {
-            tableClose()
+            if (tables) {
+              const sameTableName = tables.find((v) => v.name === selectedTable)
+              if (sameTableName) {
+                tableOpen(selectedTable)
+              } else if (tables[0]) {
+                tableOpen(tables[0].name)
+              } else {
+                tableClose()
+              }
+            }
           } else {
             tableOpen(selectedTable)
+          }
+        } else {
+          if (tables && tables[0]) {
+            tableOpen(tables[0].name)
           }
         }
       } else {
